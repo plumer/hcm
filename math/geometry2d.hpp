@@ -6,102 +6,100 @@
 
 namespace hcm {
 
-class Point2f;
+class pt2;
 
-class Vector2f {
+class vec2 {
 public:
 	float x, y;
 
-	Vector2f() : x{ 1.0f }, y{ 0.0f } {}
-	Vector2f(float _x, float _y) : x{ _x }, y{ _y } {}
-	explicit Vector2f(const Point2f &p);
+	vec2() : x{ 1.0f }, y{ 0.0f } {}
+	vec2(float _x, float _y) : x{ _x }, y{ _y } {}
+	explicit vec2(const pt2 &p);
 	float & operator [] (int i) { return (&x)[i]; }
 	float   operator [] (int i) const { return (&x)[i]; }
 
-	Vector2f operator + (const Vector2f & rhs) const { return Vector2f{ x + rhs.x, y + rhs.y }; }
-	Vector2f operator - (const Vector2f & rhs) const { return Vector2f{ x - rhs.x, y - rhs.y }; }
-	Vector2f operator * (float s) const { return Vector2f{ x * s, y*s }; }
-	Vector2f operator / (float s) const { assert(s != 0.0f); return Vector2f{ x / s, y / s }; }
+	vec2 operator + (const vec2 & rhs) const { return vec2{ x + rhs.x, y + rhs.y }; }
+	vec2 operator - (const vec2 & rhs) const { return vec2{ x - rhs.x, y - rhs.y }; }
+	vec2 operator * (float s) const { return vec2{ x * s, y*s }; }
+	vec2 operator / (float s) const { assert(s != 0.0f); return vec2{ x / s, y / s }; }
 
-	Vector2f & operator += (const Vector2f & rhs) { x += rhs.x; y += rhs.y; return *this; }
-	Vector2f & operator -= (const Vector2f & rhs) { x -= rhs.x; y -= rhs.y; return *this; }
-	Vector2f & operator *= (float s) { x *= s; y *= s; return *this; }
-	Vector2f & operator /= (float s) { assert(s != 0.0f); x /= s; y /= s; return *this; }
+	vec2 & operator += (const vec2 & rhs) { x += rhs.x; y += rhs.y; return *this; }
+	vec2 & operator -= (const vec2 & rhs) { x -= rhs.x; y -= rhs.y; return *this; }
+	vec2 & operator *= (float s) { x *= s; y *= s; return *this; }
+	vec2 & operator /= (float s) { assert(s != 0.0f); x /= s; y /= s; return *this; }
 
 	// Dot-product and cross-product
-	float operator * (const Vector2f & rhs) const { return x*rhs.x + y*rhs.y; }
-	float operator ^ (const Vector2f & rhs) const { return x*rhs.y - y*rhs.x; }
-	float dot(const Vector2f & rhs) const { return (*this)*rhs; }
-	float cross(const Vector2f & rhs) const { return (*this) ^ rhs; }
+	float operator * (const vec2 & rhs) const { return x*rhs.x + y*rhs.y; }
+	float operator ^ (const vec2 & rhs) const { return x*rhs.y - y*rhs.x; }
+	float dot(const vec2 & rhs) const { return (*this)*rhs; }
+	float cross(const vec2 & rhs) const { return (*this) ^ rhs; }
 
 	// return vector in opposite direction
-	Vector2f operator - () const { return Vector2f{ -x, -y }; }
+	vec2 operator - () const { return vec2{ -x, -y }; }
 
-	float length() const { return std::sqrt(this->lengthSquared()); }
-	float lengthSquared() const { return x*x + y*y; }
+	float length() const { return std::sqrt(this->length_squared()); }
+	float length_squared() const { return x*x + y*y; }
 	void normalize() { float l = length(); assert(l > 0.0f); x /= l; y /= l; }
-	Vector2f normalized() const { float l = length(); assert(l > 0.0f); return Vector2f{ x / l, y / l }; }
+	vec2 normalized() const { float l = length(); assert(l > 0.0f); return vec2{ x / l, y / l }; }
 
-	static const Vector2f XBASE;
-	static const Vector2f YBASE;
-	static const Vector2f &XDIR;
-	static const Vector2f &YDIR;
+	static vec2 xbase() {return vec2{1, 0};}
+	static vec2 ybase() {return vec2{0, 1};}
 };
 
-static inline Vector2f operator * (float s, const Vector2f &v) { return v * s; }
+static inline vec2 operator * (float s, const vec2 &v) { return v * s; }
 
-class Point2f {
+class pt2 {
 public:
 	float x, y;
-	Point2f() : x{ 0.0f }, y{ 0.0f } {}
-	Point2f(float _x, float _y) : x{ _x }, y{ _y } {}
-	explicit Point2f(const Vector2f &v) : x{ v.x }, y{ v.y } {};
+	pt2() : x{ 0.0f }, y{ 0.0f } {}
+	pt2(float _x, float _y) : x{ _x }, y{ _y } {}
+	explicit pt2(const vec2 &v) : x{ v.x }, y{ v.y } {};
 
 	float & operator [] (int i) { return (&x)[i]; }
 	float   operator [] (int i) const { return (&x)[i]; }
 
 	// point +/+= vec, point -/-= vec
-	Point2f operator + (const Vector2f & rhs) const { return Point2f{ x + rhs.x, y + rhs.y }; }
-	Point2f operator - (const Vector2f & rhs) const { return Point2f{ x - rhs.x, y - rhs.y }; }
+	pt2 operator + (const vec2 & rhs) const { return pt2{ x + rhs.x, y + rhs.y }; }
+	pt2 operator - (const vec2 & rhs) const { return pt2{ x - rhs.x, y - rhs.y }; }
 
-	Point2f & operator += (const Vector2f & rhs) { x += rhs.x; y += rhs.y; return *this; }
-	Point2f & operator -= (const Vector2f & rhs) { x -= rhs.x; y -= rhs.y; return *this; }
+	pt2 & operator += (const vec2 & rhs) { x += rhs.x; y += rhs.y; return *this; }
+	pt2 & operator -= (const vec2 & rhs) { x -= rhs.x; y -= rhs.y; return *this; }
 
 	// point - point
-	Vector2f operator - (const Point2f & rhs) const { return Vector2f{ x - rhs.x, y - rhs.y }; }
+	vec2 operator - (const pt2 & rhs) const { return vec2{ x - rhs.x, y - rhs.y }; }
 
 	// static methods
-	static Point2f origin() { return ORIGIN; }
-	static const Point2f ORIGIN;
+	static pt2 origin() { return pt2{0, 0}; }
 };
 
-inline Vector2f::Vector2f(const Point2f &p) : x{ p.x }, y{ p.y } {}
+inline vec2::vec2(const pt2 &p) : x{ p.x }, y{ p.y } {}
 
-inline Point2f operator + (const Vector2f &v, const Point2f &p) {return p + v;}
+inline pt2 operator + (const vec2 &v, const pt2 &p) {return p + v;}
 
-class Complex {
+class complex {
 public:
 	float re, im;
-	Complex() : re{ 1.0f }, im{ 0.0f } {}
-	Complex(float _re, float _im) : re{ _re }, im{ _im } {}
+	complex() : re{ 1.0f }, im{ 0.0f } {}
+	complex(float _re, float _im) : re{ _re }, im{ _im } {}
 
-	Complex operator+(const Complex& rhs) { return Complex{ re + rhs.re, im + rhs.im }; }
-	Complex operator-(const Complex& rhs) { return Complex{ re - rhs.re, im - rhs.im }; }
-	Complex operator*(const Complex& rhs) { return Complex{ re*rhs.re - im*rhs.im, re*rhs.im + im*rhs.re }; }
-	Complex operator/(const Complex& rhs) { return (*this)*(rhs.conjugate()) / rhs.length(); }
-	Complex operator*(float s) { return Complex{ re*s, im*s }; }
-	Complex operator/(float s) { return Complex{ re / s, im / s }; }
+	complex operator+(const complex& rhs) { return complex{ re + rhs.re, im + rhs.im }; }
+	complex operator-(const complex& rhs) { return complex{ re - rhs.re, im - rhs.im }; }
+	complex operator*(const complex& rhs) { return complex{ re*rhs.re - im*rhs.im, re*rhs.im + im*rhs.re }; }
+	complex operator/(const complex& rhs) { return (*this)*(rhs.conjugate()) / rhs.length(); }
+	complex operator*(float s) { return complex{ re*s, im*s }; }
+	complex operator/(float s) { return complex{ re / s, im / s }; }
 
-	Complex conjugate() const { return Complex{ re, -im }; }
-	float length() const { return re*re + im*im; }
+	complex conjugate() const { return complex{ re, -im }; }
+	float length() const {return std::sqrt(length_squared());}
+	float length_squared() const { return re*re + im*im; }
 
-	static Complex rotater(float degree) {
+	static complex rotater(float degree) {
 		float radian = TO_RADIAN(degree);
-		return Complex{ std::cos(radian), std::sin(radian) };
+		return complex{ std::cos(radian), std::sin(radian) };
 	}
-	Vector2f operator * (const Vector2f &v) { return Vector2f{ v.x*re - v.y*im, v.x*im + v.y*re }; }
+	vec2 operator * (const vec2 &v) { return vec2{ v.x*re - v.y*im, v.x*im + v.y*re }; }
 
-	static const Complex i;
+	static complex i() {return complex{0, 1};}
 };
 
 

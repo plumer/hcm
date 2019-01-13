@@ -13,227 +13,219 @@
 
 namespace hcm {
 
-class Matrix3f {
+class mat3 {
 public:
-	Vector3f columns[3];
+	vec3 c0, c1, c2;
 
-	Matrix3f() {
-		columns[0].x = columns[1].y = columns[2].z = 1.0f;
+	mat3() {
+		c0.x = c1.y = c2.z = 1.0f;
 	}
-	Matrix3f(const Vector3f &c0, const Vector3f &c1, const Vector3f &c2) {
-		columns[0] = c0;
-		columns[1] = c1;
-		columns[2] = c2;
-	}
+	mat3(const vec3 &c0, const vec3 &c1, const vec3 &c2)
+	: c0{c0}, c1{c1}, c2{c2} { }
 
 	// I don't think M+N, M-N will be used a lot...
-	Matrix3f operator + (const Matrix3f & rhs) const {
-		return Matrix3f{
-			columns[0] + rhs.columns[0],
-			columns[1] + rhs.columns[1],
-			columns[2] + rhs.columns[2]
+	mat3 operator + (const mat3 & rhs) const {
+		return mat3{
+			c0 + rhs.c0,
+			c1 + rhs.c1,
+			c2 + rhs.c2
 		};
 	}
 
-	Matrix3f operator - (const Matrix3f & rhs) const {
-		return Matrix3f{
-			columns[0] - rhs.columns[0],
-			columns[1] - rhs.columns[1],
-			columns[2] - rhs.columns[2]
+	mat3 operator - (const mat3 & rhs) const {
+		return mat3{
+			c0 - rhs.c0,
+			c1 - rhs.c1,
+			c2 - rhs.c2
 		};
 	}
 
-	Matrix3f operator * (const Matrix3f & rhs) const {
-		return Matrix3f{
-			(*this)*rhs.columns[0],
-			(*this)*rhs.columns[1],
-			(*this)*rhs.columns[2]
+	mat3 operator * (const mat3 & rhs) const {
+		return mat3{
+			(*this)*rhs.c0,
+			(*this)*rhs.c1,
+			(*this)*rhs.c2
 		};
 	}
 
 	// multiplication is in the order of (*this) * (rhs).
 
-	Vector3f operator * (const Vector3f & v) const {
-		return columns[0] * v.x + columns[1] * v.y + columns[2] * v.z;
+	vec3 operator * (const vec3 & v) const {
+		return c0 * v.x + c1 * v.y + c2 * v.z;
 	}
 
-	Matrix3f & operator += (const Matrix3f & rhs) {
-		columns[0] += rhs.columns[0];
-		columns[1] += rhs.columns[1];
-		columns[2] += rhs.columns[2];
+	mat3 & operator += (const mat3 & rhs) {
+		c0 += rhs.c0;
+		c1 += rhs.c1;
+		c2 += rhs.c2;
 		return *this;
 	}
 
-	Matrix3f & operator -= (const Matrix3f & rhs) {
-		columns[0] -= rhs.columns[0];
-		columns[1] -= rhs.columns[1];
-		columns[2] -= rhs.columns[2];
+	mat3 & operator -= (const mat3 & rhs) {
+		c0 -= rhs.c0;
+		c1 -= rhs.c1;
+		c2 -= rhs.c2;
 		return *this;
 	}
 
-	Matrix3f & operator *= (const Matrix3f & rhs) {
-		Matrix3f temp = (*this) * rhs;
+	mat3 & operator *= (const mat3 & rhs) {
+		mat3 temp = (*this) * rhs;
 		(*this) = temp;
 		return *this;
 	}
 
-
 	// one can only get a copy of a row of matrix
-	Vector3f   row(int x) const {
-		return Vector3f{ columns[0][x], columns[1][x], columns[2][x] };
+	vec3   row(int x) const {
+		return vec3{ c0[x], c1[x], c2[x] };
 	}
 
 	// however a reference to a column is accessible.
-	Vector3f & col(int x) { return columns[x]; }
-	const Vector3f & col(int x) const { return columns[x]; }
+	vec3 & col(int x) { return (&c0)[x]; }
+	const vec3 & col(int x) const { return (&c0)[x]; }
 
 	// transpose, inverse and determinant
 	void transpose() {
 #define SWAP_CODE9527(a, b) \
 	do {decltype(a) t = b; b = a; a = t;} while (0)
-		SWAP_CODE9527(columns[0].y, columns[1].x);
-		SWAP_CODE9527(columns[0].z, columns[2].x);
-		SWAP_CODE9527(columns[1].z, columns[2].y);
+		SWAP_CODE9527(c0.y, c1.x);
+		SWAP_CODE9527(c0.z, c2.x);
+		SWAP_CODE9527(c1.z, c2.y);
 #undef SWAP_CODE9527
 	}
 
-	Matrix3f transposed() const {
-		return Matrix3f{
-			Vector3f{ columns[0].x, columns[1].x, columns[2].x },
-			Vector3f{ columns[0].y, columns[1].y, columns[2].y },
-			Vector3f{ columns[0].z, columns[1].z, columns[2].z }
+	mat3 transposed() const {
+		return mat3{
+			vec3{ c0.x, c1.x, c2.x },
+			vec3{ c0.y, c1.y, c2.y },
+			vec3{ c0.z, c1.z, c2.z }
 		};
 	}
 	void invert() {
 		// I copied this code from Dr. Popescu
-		const Vector3f a = row(0), b = row(1), c = row(2);
-		Vector3f _a = b ^ c; _a /= (a * _a);
-		Vector3f _b = c ^ a; _b /= (b * _b);
-		Vector3f _c = a ^ b; _c /= (c * _c);
-		columns[0] = _a; columns[1] = _b; columns[2] = _c;
+		const vec3 a = row(0), b = row(1), c = row(2);
+		vec3 _a = b ^ c; _a /= (a * _a);
+		vec3 _b = c ^ a; _b /= (b * _b);
+		vec3 _c = a ^ b; _c /= (c * _c);
+		c0 = _a; c1 = _b; c2 = _c;
 	}
 
-	Matrix3f inverse() const {
-		const Vector3f a = row(0), b = row(1), c = row(2);
-		Vector3f _a = b ^ c; _a /= (a * _a);
-		Vector3f _b = c ^ a; _b /= (b * _b);
-		Vector3f _c = a ^ b; _c /= (c * _c);
+	mat3 inverse() const {
+		const vec3 a = row(0), b = row(1), c = row(2);
+		vec3 _a = b ^ c; _a /= (a * _a);
+		vec3 _b = c ^ a; _b /= (b * _b);
+		vec3 _c = a ^ b; _c /= (c * _c);
 
-		return Matrix3f{ _a, _b, _c };
+		return mat3{ _a, _b, _c };
 	}
 	float det() const {
-		return (columns[0] ^ columns[1])*columns[2];
+		return (c0 ^ c1)*c2;
 	}
 
-
-	float frobeniusNorm() const {
+	float frobenius_norm() const {
 		return std::sqrt(
-			columns[0].lengthSquared() + columns[1].lengthSquared() + columns[2].lengthSquared());
+			c0.length_squared() + c1.length_squared() + c2.length_squared());
 	}
 
 
-	static Matrix3f rotateX(float degree) {
+	static mat3 rotateX(float degree) {
 		float radian = TO_RADIAN(degree);
 		float cosAngle = std::cosf(radian);
 		float sinAngle = std::sinf(radian);
 
 		// c & -s \\ s & c
-		return Matrix3f{
-			Vector3f::XBASE,
-			Vector3f{ 0, cosAngle, sinAngle },
-			Vector3f{ 0, -sinAngle, cosAngle }
+		return mat3{
+			vec3::xbase(),
+			vec3{ 0, cosAngle, sinAngle },
+			vec3{ 0, -sinAngle, cosAngle }
 		};
 	}
-	static Matrix3f rotateY(float degree) {
+	static mat3 rotateY(float degree) {
 		float radian = TO_RADIAN(degree);
 		float cosAngle = std::cosf(radian);
 		float sinAngle = std::sinf(radian);
 
 		// c & -s \\ s & c
-		return Matrix3f{
-			Vector3f{ cosAngle, 0.0, -sinAngle },
-			Vector3f::YBASE,
-			Vector3f{ sinAngle, 0.0, cosAngle }
+		return mat3{
+			vec3{ cosAngle, 0.0, -sinAngle },
+			vec3::ybase(),
+			vec3{ sinAngle, 0.0, cosAngle }
 		};
 	}
-	static Matrix3f rotateZ(float degree) {
+	static mat3 rotateZ(float degree) {
 		float radian = TO_RADIAN(degree);
 		float cosAngle = std::cosf(radian);
 		float sinAngle = std::sinf(radian);
 
 		// c & -s \\ s & c
-		return Matrix3f{
-			Vector3f{ cosAngle, sinAngle, 0 },
-			Vector3f{ -sinAngle, cosAngle, 0 },
-			Vector3f::ZBASE
+		return mat3{
+			vec3{ cosAngle, sinAngle, 0 },
+			vec3{ -sinAngle, cosAngle, 0 },
+			vec3::zbase()
 		};
 	}
 
-	static Matrix3f rotate(const Vector3f & axis, float degree) {
-		Vector3f a = axis.normalized();
+	static mat3 rotate(const vec3 & axis, float degree) {
+		vec3 a = axis.normalized();
 		float sinT = std::sin(TO_RADIAN(degree));
 		float cosT = std::cos(TO_RADIAN(degree));
-		return Matrix3f{
-			Vector3f{ a.x*a.x + cosT * (1 - a.x*a.x), a.x*a.y*(1 - cosT) - sinT * a.z, a.x*a.z*(1 - cosT) + sinT * a.y },
-			Vector3f{ a.x*a.y*(1 - cosT) + sinT * a.z, a.y*a.y + cosT * (1 - a.y*a.y), a.y*a.z*(1 - cosT) - sinT * a.x },
-			Vector3f{ a.x*a.z*(1 - cosT) - sinT * a.y, a.y*a.z*(1 - cosT) + sinT * a.x, a.z*a.z + cosT * (1 - a.z*a.z) }
+		return mat3{
+			vec3{ a.x*a.x + cosT * (1 - a.x*a.x), a.x*a.y*(1 - cosT) - sinT * a.z, a.x*a.z*(1 - cosT) + sinT * a.y },
+			vec3{ a.x*a.y*(1 - cosT) + sinT * a.z, a.y*a.y + cosT * (1 - a.y*a.y), a.y*a.z*(1 - cosT) - sinT * a.x },
+			vec3{ a.x*a.z*(1 - cosT) - sinT * a.y, a.y*a.z*(1 - cosT) + sinT * a.x, a.z*a.z + cosT * (1 - a.z*a.z) }
 		};
 	}
-
-	static const Matrix3f IDENTITY;
 };
 
-std::ostream & operator << (std::ostream &, const Matrix3f & m);
-
-
-class Matrix4f {
+class mat4 {
 public:
-	Vector4f c0, c1, c2, c3;
-	Matrix4f() :
-		c0{ Vector4f::XBASE }, c1{ Vector4f::YBASE }, c2{ Vector4f::ZBASE }, c3{ Vector4f::WBASE } {}
-	Matrix4f(const Vector4f &a, const Vector4f &b, const Vector4f &c, const Vector4f &d) :
+	vec4 c0, c1, c2, c3;
+	mat4() :
+		c0{ vec4::xbase() }, c1{ vec4::ybase() },
+		c2{ vec4::zbase() }, c3{ vec4::wbase() } {}
+	mat4(const vec4 &a, const vec4 &b, const vec4 &c, const vec4 &d) :
 		c0{ a }, c1{ b }, c2{ c }, c3{ d } {
             
         }
-	Matrix4f(const Vector4f _c[4]) :
+	mat4(const vec4 _c[4]) :
 		c0{ _c[0] }, c1{ _c[1] }, c2{ _c[2] }, c3{ _c[3] } {}
-	explicit Matrix4f(const Matrix3f &m) :
-		c0{ m.columns[0] }, c1{ m.columns[1] }, c2{ m.columns[2] }, c3{ Vector4f::WBASE } {}
-	Matrix4f(const float m[16], bool t = false) {
+	explicit mat4(const mat3 &m) :
+		c0{ m.c0 }, c1{ m.c1 }, c2{ m.c2 },
+		c3{ vec4::wbase() } {}
+	mat4(const float m[16], bool t = false) {
 		memcpy(&c0, m, sizeof(float) * 16);
 		if (t) transpose();
 	}
 
-	Vector4f & operator[](int i) { return (&c0)[i]; }
-	const Vector4f & operator[](int i) const { return (&c0)[i]; }
+	vec4 & operator[](int i) { return (&c0)[i]; }
+	const vec4 & operator[](int i) const { return (&c0)[i]; }
 
-	Matrix4f(const Matrix4f &m) = default;
-	Matrix4f& operator=(const Matrix4f &m) = default;
+	mat4(const mat4 &m) = default;
+	mat4& operator=(const mat4 &m) = default;
 
-	Matrix4f & operator+=(const Matrix4f &rhs) {
+	mat4 & operator+=(const mat4 &rhs) {
 		c0 += rhs.c0; c1 += rhs.c1; c2 += rhs.c2; c3 += rhs.c3;
 		return *this;
 	}
-	Matrix4f & operator -= (const Matrix4f &rhs) {
+	mat4 & operator -= (const mat4 &rhs) {
 		c0 -= rhs.c0; c1 -= rhs.c1; c2 -= rhs.c2; c3 -= rhs.c3;
 		return *this;
 	}
-	Matrix4f & operator *= (float s) {
+	mat4 & operator *= (float s) {
 		c0 *= s; c1 *= s; c2 *= s; c3 *= s;
 		return *this;
 	}
-	Matrix4f & operator /= (float s) {
+	mat4 & operator /= (float s) {
 		float inv = 1.0f / s;
 		c0 *= inv; c1 *= inv; c2 *= inv; c3 *= inv;
 		return *this;
 	}
 
-	Matrix4f operator + (const Matrix4f &rhs) const { return Matrix4f{ *this } += rhs; }
-	Matrix4f operator - (const Matrix4f &rhs) const { return Matrix4f{ *this } -= rhs; }
-	Matrix4f operator * (float s) const { return Matrix4f{ *this } *= s; }
-	Matrix4f operator / (float s) const { return Matrix4f{ *this } /= s; }
+	mat4 operator + (const mat4 &rhs) const { return mat4{ *this } += rhs; }
+	mat4 operator - (const mat4 &rhs) const { return mat4{ *this } -= rhs; }
+	mat4 operator * (float s) const { return mat4{ *this } *= s; }
+	mat4 operator / (float s) const { return mat4{ *this } /= s; }
 
-	Vector4f operator * (const Vector4f &v) const {
+	vec4 operator * (const vec4 &v) const {
 		//return c0*v.x + c1*v.y + c2*v.z + c3*v.w;
 		__m128 i0 = _mm_mul_ps(_mm_set_ps1(v.x), c0.simdData);
 		__m128 i1 = _mm_mul_ps(_mm_set_ps1(v.y), c1.simdData);
@@ -242,11 +234,11 @@ public:
 
 		__m128 i01 = _mm_add_ps(i0, i1);
 		__m128 i23 = _mm_add_ps(i2, i3);
-		return Vector4f{ _mm_add_ps(i01, i23) };
+		return vec4{ _mm_add_ps(i01, i23) };
 
 	}
-	Matrix4f operator * (const Matrix4f &rhs) const {
-		Matrix4f res;
+	mat4 operator * (const mat4 &rhs) const {
+		mat4 res;
 		res.c0 = this->operator*(rhs.c0);
 		res.c1 = this->operator*(rhs.c1);
 		res.c2 = this->operator*(rhs.c2);
@@ -268,13 +260,15 @@ public:
 	x = _mm_sub_ps(x, _mm_mul_ps(xOverW), w);
 
 	// calculate x^y.z.
-	return (Vector3f{x}.cross(Vector3f{y}).dot(Vector3f{z});
+	return (vec3{x}.cross(vec3{y}).dot(vec3{z});
 	}
 	*/
-	float frobeniusNorm() const {
-		return std::sqrt(
-			c0.lengthSquared() + c1.lengthSquared() + c2.lengthSquared() + c3.lengthSquared()
-		);
+	float frobenius_norm_squared() const {
+		return c0.length_squared() + c1.length_squared() + 
+			c2.length_squared() + c3.length_squared();
+	}
+	float frobenius_norm() const {
+		return std::sqrt(frobenius_norm_squared());
 	}
 
 	void transpose() {
@@ -418,10 +412,22 @@ public:
 
 	}
 
-	static Matrix4f perspective(float fovy_deg, float aspect, float _near, float _far) {
+	float is_identity() const {
+		return frobenius_norm_squared() < 1e-6;
+	}
+	float is_identity_precise() const {
+		// TODO: use _mm_test_all_zeros() (SSE4.1, smmintrin.h)
+		// _mm_testc_ps is also good (avx)
+		// do not use XOR since [0.f == -0.f] but [xor(0.f, -0.f) != 0]
+		return frobenius_norm_squared() == 0;
+	}
+
+	// >>>>>>>>>>>>>>>>>> static builders >>>>>>>>>>>>>>>>
+
+	static mat4 perspective(float fovy_deg, float aspect, float _near, float _far) {
 		const float fovy_rad = TO_RADIAN(fovy_deg);
 		const float tanHalfFovy = std::tanf(fovy_rad / 2.0f);
-		Matrix4f res = Matrix4f::ZERO;
+		mat4 res = mat4::zero();
 		/*
 		T const tanHalfFovy = tan(fovy / static_cast<T>(2));
 
@@ -450,89 +456,89 @@ public:
 		res.c3.z = -(_far * _near) * 2.0f / (_far - _near);
 		return res;
 	}
-	static Matrix4f translate(const Vector3f &t) {
-		Matrix4f res;
-		res.c3 = Vector4f{ t, 1.0f };
+	static mat4 translate(const vec3 &t) {
+		mat4 res;
+		res.c3 = vec4{ t, 1.0f };
 		return res;
 	}
 
-	static Matrix4f diag(const Vector3f &diag) {
-		Matrix4f res;
+	static mat4 diag(const vec3 &diag) {
+		mat4 res;
 		res.c0.x = diag.x;
 		res.c1.y = diag.y;
 		res.c2.z = diag.z;
 		return res;
 	}
 
-	static Matrix4f diag(float scale) {
-		return Matrix4f::diag(Vector3f{ scale, scale, scale });
+	static mat4 diag(float scale) {
+		return mat4::diag(vec3{ scale, scale, scale });
 	}
 
 	// Conversion to float *
 	explicit operator float *() { return &(c0.x); }
 	explicit operator const float *() const { return &(c0.x); }
 
-	static Matrix4f rotateX(float degree) {
+	static mat4 rotateX(float degree) {
 		float radian = TO_RADIAN(degree);
 		float cosAngle = std::cosf(radian);
 		float sinAngle = std::sinf(radian);
 
-		return Matrix4f{
-			Vector4f::XBASE,
-			Vector4f{ 0, cosAngle, sinAngle, 0.0f },
-			Vector4f{ 0.0f, -sinAngle, cosAngle, 0.0f },
-			Vector4f::WBASE
+		return mat4{
+			vec4::xbase(),
+			vec4{ 0, cosAngle, sinAngle, 0.0f },
+			vec4{ 0.0f, -sinAngle, cosAngle, 0.0f },
+			vec4::wbase()
 		};
 	}
-	static Matrix4f rotateY(float degree) {
+	static mat4 rotateY(float degree) {
 		float radian = TO_RADIAN(degree);
 		float cosAngle = std::cosf(radian);
 		float sinAngle = std::sinf(radian);
 
-		Matrix4f ret = Matrix4f::IDENTITY;
+		mat4 ret;
 		ret.c0.simdData = _mm_set_ps(0.0f, -sinAngle, 0.0f, cosAngle);
 		ret.c2.simdData = _mm_set_ps(0.0f, cosAngle, 0.0f, sinAngle);
 		return ret;
 	}
-	static Matrix4f rotateZ(float degree) {
+	static mat4 rotateZ(float degree) {
 		float radian = TO_RADIAN(degree);
 		float cosAngle = std::cosf(radian);
 		float sinAngle = std::sinf(radian);
 
-		Matrix4f ret = Matrix4f::IDENTITY;
+		mat4 ret;
 		ret.c0.simdData = _mm_set_ps(0.0f, 0.0f, sinAngle, cosAngle);
 		ret.c1.simdData = _mm_set_ps(0.0f, 0.0f, cosAngle, -sinAngle);
 		return ret;
 	}
-	static Matrix4f rotate(const Vector3f & axis, float degree) {
-		Matrix3f m3 = Matrix3f::rotate(axis, degree);
-		Matrix4f ret;
-		ret.c0 = Vector4f{ m3.columns[0] };
-		ret.c1 = Vector4f{ m3.columns[1] };
-		ret.c2 = Vector4f{ m3.columns[2] };
+	static mat4 rotate(const vec3 & axis, float degree) {
+		mat3 m3 = mat3::rotate(axis, degree);
+		mat4 ret;
+		ret.c0 = vec4{ m3.c0 };
+		ret.c1 = vec4{ m3.c1 };
+		ret.c2 = vec4{ m3.c2 };
 		return ret;
 	}
 
-	static Matrix4f lookAt(const Point3f & origin, const Point3f & target, const Vector3f & up) {
-		return Matrix4f::lookAt(origin, target - origin, up);
+	static mat4 lookAt(const pt3 & origin, const pt3 & target, const vec3 & up) {
+		return mat4::lookAt(origin, target - origin, up);
 	}
-	static Matrix4f lookAt(const Point3f & origin, const Vector3f & viewDir, const Vector3f & up) {
-#if COORDINATE_SYSTEM_HANDEDNESS == COORDINATE_SYSTEM_RIGHT_HANDED
+	static mat4 lookAt(const pt3 & origin, const vec3 & viewDir, const vec3 & up) {
+#		if COORDINATE_SYSTEM_HANDEDNESS == COORDINATE_SYSTEM_RIGHT_HANDED
 		// viewDir = -z, up = y, right = x
-		Vector3f z = -viewDir.normalized();
-		Vector3f x = up ^ z;
+		vec3 z = -viewDir.normalized();
+		vec3 x = up ^ z;
 		x.normalize();
-		Vector3f y = z ^ x;
+		vec3 y = z ^ x;
 		y.normalize(); // may be unnecessary.
-#else
+#		else
 		// if left-handed system
 		// viewDir = z, up = y, right = x
-		Vector3f z = viewDir.normalized();
-		Vector3f x = up ^ z;
+		vec3 z = viewDir.normalized();
+		vec3 x = up ^ z;
 		x.normalize();
-		Vector3f y = z ^ x;
+		vec3 y = z ^ x;
 		y.normalize();
-#endif
+#		endif
 		// Let M = Matrix{x, y, z}.
 		// then p'=M(p) transforms p from object space to camera's space.
 		// What _lookAt_ transform is actually an INVERSE of such transform.
@@ -541,17 +547,14 @@ public:
 		// 			| 0 1 |  so M(p) = R(p)+T = T(R(p)).
 		// So M =   | R' -R'T |
 		// 			| 0    1  | 
-		Matrix4f ret{
-			Vector4f{ x }, Vector4f{ y }, Vector4f{ z }, Vector4f::WBASE
+		mat4 ret{
+			vec4{ x }, vec4{ y }, vec4{ z }, vec4::wbase()
 		};
 		ret.transpose();
-		ret.c3 = -(ret * Vector4f{ origin, -1.0f }); // -1.0f is used here so that it will eventually become 1.0f with the leading '-' operator.
+		ret.c3 = -(ret * vec4{ origin, -1.0f }); // -1.0f is used here so that it will eventually become 1.0f with the leading '-' operator.
 		return ret;
 	}
-	const static Matrix4f IDENTITY;
-	const static Matrix4f ZERO;
+	static mat4 zero() {mat4 res; memset(&res, sizeof(res), 0); return res;}
 };
 
 } // namespace hcm
-
-std::ostream & operator << (std::ostream &, const hcm::Matrix4f & m);
